@@ -1,0 +1,9 @@
+.idea/
+*.iml
+target/
+*.log
+.DS_Store
+*.class
+.mvn/
+!**/src/main/**/target/
+!**/src/test/**/target/
