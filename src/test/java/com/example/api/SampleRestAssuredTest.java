@@ -1,18 +1,15 @@
 package com.example.api;
 
-import io.restassured.path.json.JsonPath;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 示例接口测试类
  */
-public class SampleApiTest {
+public class SampleRestAssuredTest {
 
    /* @BeforeAll
     static void setup() {

@@ -35,6 +35,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JUnit 5 参数化测试 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- JUnit Platform Launcher：VS Code Test Runner 需要 -->
         <dependency>
             <groupId>org.junit.platform</groupId>
