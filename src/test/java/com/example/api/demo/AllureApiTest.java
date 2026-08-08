@@ -1,4 +1,4 @@
-package com.example.api;
+package com.example.api.demo;
 
 import io.qameta.allure.*;
 import io.qameta.allure.restassured.AllureRestAssured;
