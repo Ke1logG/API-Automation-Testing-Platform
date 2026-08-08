@@ -1,5 +1,10 @@
 .idea/
 *.iml
+.vscode/
+.settings/
+.classpath
+.project
+
 target/
 *.log
 .DS_Store
@@ -7,3 +12,12 @@ target/
 .mvn/
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Allure 报告
+allure-results/
+allure-report/
+.allure/
+
+# 测试报告
+reports/
+surefire-reports/
