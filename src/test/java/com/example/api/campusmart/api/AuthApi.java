@@ -15,22 +15,22 @@ public class AuthApi {
     @Step("调用登录接口：username={request.username}")
     public static Result<String> login(LoginRequest request) {
         return TestConfig.given()
-                .body(request)
+                    .body(request)
                 .when()
-                .post("/app/login")
+                    .post("/app/login")
                 .then()
-                .extract()
-                .as(new TypeRef<Result<String>>() {});
+                    .extract()
+                    .as(new TypeRef<Result<String>>() {});
     }
 
     @Step("调用注册接口：username={request.username}")
     public static Result<Void> register(RegisterRequest request) {
         return TestConfig.given()
-                .body(request)
+                    .body(request)
                 .when()
-                .post("/app/register")
+                    .post("/app/register")
                 .then()
-                .extract()
-                .as(new TypeRef<Result<Void>>() {});
+                    .extract()
+                    .as(new TypeRef<Result<Void>>() {});
     }
 }
