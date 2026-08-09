@@ -1,6 +1,7 @@
 package com.example.api.campusmart.testcase;
 
 import com.example.api.campusmart.api.AuthApi;
+import com.example.api.campusmart.common.ResultCode;
 import com.example.api.campusmart.dto.LoginRequest;
 import com.example.api.campusmart.dto.RegisterRequest;
 import com.example.api.campusmart.dto.Result;
@@ -28,8 +29,8 @@ public class AuthApiTest {
 
         Result<Void> result = AuthApi.register(request);
 
-        assertThat(result.getCode()).isEqualTo(200);
-        assertThat(result.getMessage()).isEqualTo("成功");
+        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        assertThat(result.getMessage()).isEqualTo(ResultCode.SUCCESS.getMessage());
     }
 
     @Test
@@ -39,12 +40,15 @@ public class AuthApiTest {
     @Description("使用已存在的用户名注册，期望返回账号已存在")
     void shouldFailToRegisterWhenUsernameExists() {
         RegisterRequest request = RandomUtil.randomRegisterRequest();
-        AuthApi.register(request);
 
-        Result<Void> result = AuthApi.register(request);
+        Result<Void> firstRegisterResult = AuthApi.register(request);
+        assertThat(firstRegisterResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        assertThat(firstRegisterResult.getMessage()).isEqualTo(ResultCode.SUCCESS.getMessage());
 
-        assertThat(result.getCode()).isEqualTo(301);
-        assertThat(result.getMessage()).isEqualTo("账号已存在");
+        Result<Void> secondRegisterResult = AuthApi.register(request);
+
+        assertThat(secondRegisterResult.getCode()).isEqualTo(ResultCode.ACCOUNT_EXIST_ERROR.getCode());
+        assertThat(secondRegisterResult.getMessage()).isEqualTo(ResultCode.ACCOUNT_EXIST_ERROR.getMessage());
     }
 
     @Test
@@ -54,7 +58,10 @@ public class AuthApiTest {
     @Description("使用正确的用户名密码登录，期望返回 JWT token")
     void shouldLoginSuccessfully() {
         RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
-        AuthApi.register(registerRequest);
+
+        Result<Void> registerResult = AuthApi.register(registerRequest);
+        assertThat(registerResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        assertThat(registerResult.getMessage()).isEqualTo(ResultCode.SUCCESS.getMessage());
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .username(registerRequest.getUsername())
@@ -63,7 +70,7 @@ public class AuthApiTest {
 
         Result<String> result = AuthApi.login(loginRequest);
 
-        assertThat(result.getCode()).isEqualTo(200);
+        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
         assertThat(result.getData()).isNotBlank();
     }
 
@@ -74,7 +81,10 @@ public class AuthApiTest {
     @Description("使用错误的密码登录，期望返回用户名或密码错误")
     void shouldFailToLoginWithWrongPassword() {
         RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
-        AuthApi.register(registerRequest);
+
+        Result<Void> registerResult = AuthApi.register(registerRequest);
+        assertThat(registerResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        assertThat(registerResult.getMessage()).isEqualTo(ResultCode.SUCCESS.getMessage());
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .username(registerRequest.getUsername())
@@ -83,8 +93,8 @@ public class AuthApiTest {
 
         Result<String> result = AuthApi.login(loginRequest);
 
-        assertThat(result.getCode()).isEqualTo(307);
-        assertThat(result.getMessage()).isEqualTo("用户名或密码错误");
+        assertThat(result.getCode()).isEqualTo(ResultCode.ACCOUNT_ERROR.getCode());
+        assertThat(result.getMessage()).isEqualTo(ResultCode.ACCOUNT_ERROR.getMessage());
     }
 
     @Test
@@ -100,7 +110,7 @@ public class AuthApiTest {
 
         Result<String> result = AuthApi.login(loginRequest);
 
-        assertThat(result.getCode()).isEqualTo(306);
-        assertThat(result.getMessage()).isEqualTo("账号不存在");
+        assertThat(result.getCode()).isEqualTo(ResultCode.ACCOUNT_NOT_EXIST_ERROR.getCode());
+        assertThat(result.getMessage()).isEqualTo(ResultCode.ACCOUNT_NOT_EXIST_ERROR.getMessage());
     }
 }

@@ -5,9 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 注册请求参数
- */
 @Data
 @Builder
 @NoArgsConstructor
