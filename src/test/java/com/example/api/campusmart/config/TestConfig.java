@@ -10,13 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * 测试环境配置：加载 application.properties 并初始化 RestAssured 全局配置
- */
 public class TestConfig {
 
     private static final Properties PROPS = new Properties();
     private static final String BASE_URL;
+    private static final String JWT_SECRET;
 
     static {
         try (InputStream is = TestConfig.class.getClassLoader()
@@ -30,6 +28,11 @@ public class TestConfig {
         }
 
         BASE_URL = PROPS.getProperty("base.url", "http://localhost:8080");
+        JWT_SECRET = PROPS.getProperty("jwt.secret");
+        if (JWT_SECRET == null || JWT_SECRET.isBlank()) {
+            throw new IllegalStateException("未配置 jwt.secret");
+        }
+
         RestAssured.baseURI = BASE_URL;
         RestAssured.filters(new AllureRestAssured());
         RestAssured.config = RestAssured.config()
@@ -40,9 +43,18 @@ public class TestConfig {
         return BASE_URL;
     }
 
+    public static String getJwtSecret() {
+        return JWT_SECRET;
+    }
+
     public static RequestSpecification given() {
         return RestAssured.given()
                 .contentType("application/json")
                 .accept("application/json");
+    }
+
+    public static RequestSpecification givenWithToken(String token) {
+        return given()
+                .header("access-token", token);
     }
 }
