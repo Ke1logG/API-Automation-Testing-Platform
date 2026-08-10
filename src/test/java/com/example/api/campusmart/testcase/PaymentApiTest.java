@@ -10,7 +10,6 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.dto.trade.PaymentVo;
 import com.example.api.campusmart.util.RandomUtil;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,9 +46,12 @@ public class PaymentApiTest extends BaseTest {
     @Test
     @DisplayName("创建支付单成功")
     void shouldCreatePaymentSuccessfully() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, sharedGoodsId);
+        Long goodsId = publishIndependentGoods(sellerToken, sellerId);
+        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
         Long orderId = createResult.getData().getOrderID();
 
         Result<PaymentVo> result = PaymentApi.createPayment(buyerToken, orderId);
@@ -90,29 +92,37 @@ public class PaymentApiTest extends BaseTest {
     void shouldRejectPaymentCreationByNonBuyer() {
         String sellerToken = AccountContext.getSeller().getToken();
 
-        Response response = PaymentApi.createPaymentRaw(sellerToken, sharedOrderId);
-        assertThat(response.getStatusCode()).isNotEqualTo(200);
+        Result<PaymentVo> result = PaymentApi.createPayment(sellerToken, sharedOrderId);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.ORDER_NO_PERMISSION.getCode());
     }
 
     @Test
     @DisplayName("非 CREATED 状态订单不能创建支付单")
     void shouldRejectPaymentCreationForNonCreatedOrder() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, sharedGoodsId);
+        Long goodsId = publishIndependentGoods(sellerToken, sellerId);
+        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
         Long orderId = createResult.getData().getOrderID();
         OrderApi.cancelOrder(buyerToken, orderId);
 
-        Response response = PaymentApi.createPaymentRaw(buyerToken, orderId);
-        assertThat(response.getStatusCode()).isNotEqualTo(200);
+        Result<PaymentVo> result = PaymentApi.createPayment(buyerToken, orderId);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.ORDER_STATUS_ERROR.getCode());
     }
 
     @Test
     @DisplayName("取消订单后支付单变为 CLOSED")
     void shouldClosePaymentWhenOrderCancelled() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, sharedGoodsId);
+        Long goodsId = publishIndependentGoods(sellerToken, sellerId);
+        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
         Long orderId = createResult.getData().getOrderID();
 
         Result<PaymentVo> paymentResult = PaymentApi.createPayment(buyerToken, orderId);
@@ -124,5 +134,12 @@ public class PaymentApiTest extends BaseTest {
         Result<PaymentVo> queryResult = PaymentApi.getPaymentByOrderId(buyerToken, orderId);
         assertThat(queryResult.getData().getPaymentID()).isEqualTo(paymentId);
         assertThat(queryResult.getData().getStatus()).isEqualTo("CLOSED");
+    }
+
+    private static Long publishIndependentGoods(String sellerToken, Long sellerId) {
+        GoodsAddRequest request = RandomUtil.randomGoodsAddRequest(sellerId);
+        Result<Long> result = GoodsApi.addGoods(sellerToken, request);
+        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        return result.getData();
     }
 }

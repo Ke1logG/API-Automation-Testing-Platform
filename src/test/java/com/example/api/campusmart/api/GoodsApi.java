@@ -96,22 +96,17 @@ public class GoodsApi {
     }
 
     /**
-     * 用于异常场景：返回原始 Response，方便断言 HTTP 状态码
-     */
-    public static Response addGoodsRaw(String token, GoodsAddRequest request) {
-        return TestConfig.givenWithToken(token)
-                    .body(request)
-                .when()
-                    .post("/app/goods/add");
-    }
-
-    /**
      * 用于未登录场景：不带 token 发送请求
      */
-    public static Response getGoodsByIdWithoutToken(Long id) {
+    public static Result<GoodsDetail> getGoodsByIdWithoutToken(Long id) {
         return TestConfig.given()
                     .queryParam("id", id)
                 .when()
-                    .get("/app/goods/selectById");
+                    .get("/app/goods/selectById")
+                .then()
+                    .statusCode(200)
+                    .extract()
+                    .as(new TypeRef<Result<GoodsDetail>>() {
+                    });
     }
 }

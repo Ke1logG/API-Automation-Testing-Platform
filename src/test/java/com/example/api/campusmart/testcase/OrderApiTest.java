@@ -13,7 +13,6 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,8 +67,9 @@ public class OrderApiTest extends BaseTest {
     void shouldRejectSelfPurchase() {
         String sellerToken = AccountContext.getSeller().getToken();
 
-        Response response = OrderApi.createOrderRaw(sellerToken, sharedGoodsId);
-        assertThat(response.getStatusCode()).isNotEqualTo(200);
+        Result<OrderVo> result = OrderApi.createOrder(sellerToken, sharedGoodsId);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.GOODS_SELF_PURCHASE.getCode());
     }
 
     @Test

@@ -9,7 +9,6 @@ import com.example.api.campusmart.dto.goods.GoodsDetail;
 import com.example.api.campusmart.dto.goods.GoodsVo;
 import com.example.api.campusmart.dto.goods.PageResult;
 import com.example.api.campusmart.util.RandomUtil;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,10 +141,11 @@ public class GoodsApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("未登录访问商品接口应返回 401")
+    @DisplayName("未登录访问商品接口应返回 TOKEN_INVALID")
     void shouldRejectUnauthorizedAccess() {
-        Response response = GoodsApi.getGoodsByIdWithoutToken(sharedGoodsId);
-        assertThat(response.getStatusCode()).isEqualTo(401);
+        Result<GoodsDetail> result = GoodsApi.getGoodsByIdWithoutToken(sharedGoodsId);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.TOKEN_INVALID.getCode());
     }
 
     @Test
@@ -162,8 +162,9 @@ public class GoodsApiTest extends BaseTest {
                 .price(100L)
                 .build();
 
-        Response response = GoodsApi.addGoodsRaw(sellerToken, invalidRequest);
-        assertThat(response.getStatusCode()).isNotEqualTo(200);
+        Result<Long> result = GoodsApi.addGoods(sellerToken, invalidRequest);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.GOODS_TITLE_EMPTY.getCode());
     }
 
     @Test
@@ -180,7 +181,8 @@ public class GoodsApiTest extends BaseTest {
                 .price(-1L)
                 .build();
 
-        Response response = GoodsApi.addGoodsRaw(sellerToken, invalidRequest);
-        assertThat(response.getStatusCode()).isNotEqualTo(200);
+        Result<Long> result = GoodsApi.addGoods(sellerToken, invalidRequest);
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.GOODS_PRICE_ILLEGAL.getCode());
     }
 }

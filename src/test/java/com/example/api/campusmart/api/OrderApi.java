@@ -73,16 +73,6 @@ public class OrderApi {
     }
 
     /**
-     * 用于异常场景：返回原始 Response，方便断言 HTTP 状态码
-     */
-    public static Response createOrderRaw(String token, Long goodId) {
-        return TestConfig.givenWithToken(token)
-                    .queryParam("goodId", goodId)
-                .when()
-                    .post("/app/orders/create");
-    }
-
-    /**
      * 用于未登录场景
      */
     public static Response getOrderDetailWithoutToken(Long orderId) {
