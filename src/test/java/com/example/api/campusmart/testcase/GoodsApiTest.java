@@ -10,7 +10,7 @@ import com.example.api.campusmart.dto.goods.GoodsVo;
 import com.example.api.campusmart.dto.goods.PageResult;
 import com.example.api.campusmart.util.RandomUtil;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,25 +22,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("商品接口测试")
 public class GoodsApiTest extends BaseTest {
 
-    private Long goodsAId;
-    private String goodsATitle;
-    private Long goodsBId;
+    private static Long sharedGoodsId;
+    private static String sharedGoodsTitle;
+    private static Long goodsToDeleteId;
 
-    @BeforeEach
-    void publishTestGoods() {
+    @BeforeAll
+    static void prepareSharedGoods() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
 
         GoodsAddRequest requestA = RandomUtil.randomGoodsAddRequest(sellerId);
-        goodsATitle = requestA.getTitle();
+        sharedGoodsTitle = requestA.getTitle();
         Result<Long> resultA = GoodsApi.addGoods(sellerToken, requestA);
         assertThat(resultA.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        goodsAId = resultA.getData();
+        sharedGoodsId = resultA.getData();
 
         GoodsAddRequest requestB = RandomUtil.randomGoodsAddRequest(sellerId);
         Result<Long> resultB = GoodsApi.addGoods(sellerToken, requestB);
         assertThat(resultB.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        goodsBId = resultB.getData();
+        goodsToDeleteId = resultB.getData();
     }
 
     @Test
@@ -63,13 +63,13 @@ public class GoodsApiTest extends BaseTest {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
 
-        Result<GoodsDetail> result = GoodsApi.getGoodsById(sellerToken, goodsAId);
+        Result<GoodsDetail> result = GoodsApi.getGoodsById(sellerToken, sharedGoodsId);
 
         assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
         assertThat(result.getData()).isNotNull();
-        assertThat(result.getData().getGoodID()).isEqualTo(goodsAId);
+        assertThat(result.getData().getGoodID()).isEqualTo(sharedGoodsId);
         assertThat(result.getData().getPublishUserID()).isEqualTo(sellerId);
-        assertThat(result.getData().getTitle()).isEqualTo(goodsATitle);
+        assertThat(result.getData().getTitle()).isEqualTo(sharedGoodsTitle);
     }
 
     @Test
@@ -85,9 +85,9 @@ public class GoodsApiTest extends BaseTest {
         assertThat(result.getData().getCurrent()).isEqualTo(1);
         assertThat(result.getData().getSize()).isEqualTo(10);
 
-        boolean containsGoodsA = result.getData().getRecords().stream()
-                .anyMatch(g -> g.getGoodID().equals(goodsAId));
-        assertThat(containsGoodsA).isTrue();
+        boolean containsSharedGoods = result.getData().getRecords().stream()
+                .anyMatch(g -> g.getGoodID().equals(sharedGoodsId));
+        assertThat(containsSharedGoods).isTrue();
     }
 
     @Test
@@ -95,17 +95,17 @@ public class GoodsApiTest extends BaseTest {
     void shouldSearchGoodsByTitleSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
 
-        Result<PageResult<GoodsVo>> hitResult = GoodsApi.searchGoodsByTitle(sellerToken, 1, 10, goodsATitle);
+        Result<PageResult<GoodsVo>> hitResult = GoodsApi.searchGoodsByTitle(sellerToken, 1, 10, sharedGoodsTitle);
         assertThat(hitResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        boolean containsGoodsA = hitResult.getData().getRecords().stream()
-                .anyMatch(g -> g.getGoodID().equals(goodsAId));
-        assertThat(containsGoodsA).isTrue();
+        boolean containsSharedGoods = hitResult.getData().getRecords().stream()
+                .anyMatch(g -> g.getGoodID().equals(sharedGoodsId));
+        assertThat(containsSharedGoods).isTrue();
 
         String noHitKeyword = "不存在的商品关键字_abc123";
         Result<PageResult<GoodsVo>> noHitResult = GoodsApi.searchGoodsByTitle(sellerToken, 1, 10, noHitKeyword);
-        boolean containsGoodsAInNoHit = noHitResult.getData().getRecords().stream()
-                .anyMatch(g -> g.getGoodID().equals(goodsAId));
-        assertThat(containsGoodsAInNoHit).isFalse();
+        boolean containsSharedGoodsInNoHit = noHitResult.getData().getRecords().stream()
+                .anyMatch(g -> g.getGoodID().equals(sharedGoodsId));
+        assertThat(containsSharedGoodsInNoHit).isFalse();
     }
 
     @Test
@@ -117,14 +117,14 @@ public class GoodsApiTest extends BaseTest {
 
         Result<PageResult<GoodsVo>> sellerResult = GoodsApi.getGoodsByPoster(sellerToken, 1, 10, sellerId);
         assertThat(sellerResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        boolean containsGoodsA = sellerResult.getData().getRecords().stream()
-                .anyMatch(g -> g.getGoodID().equals(goodsAId));
-        assertThat(containsGoodsA).isTrue();
+        boolean containsSharedGoods = sellerResult.getData().getRecords().stream()
+                .anyMatch(g -> g.getGoodID().equals(sharedGoodsId));
+        assertThat(containsSharedGoods).isTrue();
 
         Result<PageResult<GoodsVo>> buyerResult = GoodsApi.getGoodsByPoster(sellerToken, 1, 10, buyerId);
-        boolean containsGoodsAInBuyerResult = buyerResult.getData().getRecords().stream()
-                .anyMatch(g -> g.getGoodID().equals(goodsAId));
-        assertThat(containsGoodsAInBuyerResult).isFalse();
+        boolean containsSharedGoodsInBuyerResult = buyerResult.getData().getRecords().stream()
+                .anyMatch(g -> g.getGoodID().equals(sharedGoodsId));
+        assertThat(containsSharedGoodsInBuyerResult).isFalse();
     }
 
     @Test
@@ -132,19 +132,19 @@ public class GoodsApiTest extends BaseTest {
     void shouldDeleteGoodsSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
 
-        Result<Boolean> deleteResult = GoodsApi.deleteGoodsById(sellerToken, goodsBId);
+        Result<Boolean> deleteResult = GoodsApi.deleteGoodsById(sellerToken, goodsToDeleteId);
         assertThat(deleteResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
         assertThat(deleteResult.getData()).isTrue();
 
-        //证明缓存被删除，保证redis与数据库的最终一致性
-        Result<GoodsDetail> queryResult = GoodsApi.getGoodsById(sellerToken, goodsBId);
+        // 删除后再次查询，验证缓存与数据库最终一致
+        Result<GoodsDetail> queryResult = GoodsApi.getGoodsById(sellerToken, goodsToDeleteId);
         assertThat(queryResult.getData()).isNull();
     }
 
     @Test
     @DisplayName("未登录访问商品接口应返回 401")
     void shouldRejectUnauthorizedAccess() {
-        Response response = GoodsApi.getGoodsByIdWithoutToken(goodsAId);
+        Response response = GoodsApi.getGoodsByIdWithoutToken(sharedGoodsId);
         assertThat(response.getStatusCode()).isEqualTo(401);
     }
 
