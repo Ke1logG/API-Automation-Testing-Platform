@@ -49,6 +49,17 @@ public class OrderApi {
                     });
     }
 
+    public static Result<Boolean> confirmOrder(String token, Long orderId) {
+        return TestConfig.givenWithToken(token)
+                .when()
+                    .post("/app/orders/{orderId}/confirm", orderId)
+                .then()
+                    .statusCode(200)
+                    .extract()
+                    .as(new TypeRef<Result<Boolean>>() {
+                    });
+    }
+
     public static Result<List<OrderVo>> listBuyerOrders(String token) {
         return TestConfig.givenWithToken(token)
                 .when()

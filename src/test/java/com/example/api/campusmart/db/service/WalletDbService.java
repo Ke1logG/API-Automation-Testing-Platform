@@ -1,0 +1,10 @@
+package com.example.api.campusmart.db.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.api.campusmart.db.entity.UserWallet;
+
+
+public interface WalletDbService extends IService<UserWallet> {
+
+    UserWallet getByUserId(Long userId);
+}
