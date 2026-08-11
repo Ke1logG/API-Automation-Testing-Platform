@@ -4,7 +4,6 @@ import com.example.api.campusmart.config.TestConfig;
 import com.example.api.campusmart.dto.Result;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.response.Response;
 
 import java.util.List;
 
@@ -72,12 +71,4 @@ public class OrderApi {
                     });
     }
 
-    /**
-     * 用于未登录场景
-     */
-    public static Response getOrderDetailWithoutToken(Long orderId) {
-        return TestConfig.given()
-                .when()
-                    .get("/app/orders/{orderId}", orderId);
-    }
 }

@@ -138,10 +138,15 @@ public class OrderApiTest extends BaseTest {
     @Test
     @DisplayName("取消 CREATED 订单成功")
     void shouldCancelOrderSuccessfully() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, sharedGoodsId);
+        Long goodsId = publishIndependentGoods(sellerToken, sellerId);
+        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
         Long orderId = createResult.getData().getOrderID();
+
+        assertThat(createResult.getData().getStatus()).isEqualTo("CREATED");
 
         Result<Boolean> cancelResult = OrderApi.cancelOrder(buyerToken, orderId);
         assertThat(cancelResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
@@ -154,14 +159,24 @@ public class OrderApiTest extends BaseTest {
     @Test
     @DisplayName("取消已取消的订单失败")
     void shouldRejectCancelNonCreatedOrder() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, sharedGoodsId);
+        Long goodsId = publishIndependentGoods(sellerToken, sellerId);
+        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
         Long orderId = createResult.getData().getOrderID();
         OrderApi.cancelOrder(buyerToken, orderId);
 
         Result<Boolean> cancelAgainResult = OrderApi.cancelOrder(buyerToken, orderId);
         assertThat(cancelAgainResult.getCode()).isEqualTo(ResultCode.ORDER_CANCEL_NOT_ALLOWED.getCode());
+    }
+
+    private static Long publishIndependentGoods(String sellerToken, Long sellerId) {
+        GoodsAddRequest request = RandomUtil.randomGoodsAddRequest(sellerId);
+        Result<Long> result = GoodsApi.addGoods(sellerToken, request);
+        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        return result.getData();
     }
 
     private static TestAccount registerThirdAccount() {
