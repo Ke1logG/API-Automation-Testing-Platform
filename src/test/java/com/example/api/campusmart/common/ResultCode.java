@@ -26,7 +26,12 @@ public enum ResultCode {
 
     PAYMENT_NOT_FOUND(801, "支付单不存在"),
     PAYMENT_STATUS_ERROR(802, "支付单状态不正确"),
-    PAYMENT_NO_PERMISSION(803, "无权操作该支付单");
+    PAYMENT_NO_PERMISSION(803, "无权操作该支付单"),
+
+    WALLET_NOT_FOUND(901, "钱包不存在"),
+    WALLET_BALANCE_INSUFFICIENT(902, "余额不足"),
+    WALLET_UPDATE_FAILED(903, "钱包更新失败"),
+    WITHDRAW_AMOUNT_INVALID(904, "提现金额必须大于0");
 
     private final int code;
     private final String message;

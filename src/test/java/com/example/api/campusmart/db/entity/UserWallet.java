@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 用户钱包表实体
@@ -29,8 +29,8 @@ public class UserWallet {
     private Long version;
 
     @TableField("createTime")
-    private LocalDateTime createTime;
+    private Date createTime;
 
     @TableField("updateTime")
-    private LocalDateTime updateTime;
+    private Date updateTime;
 }

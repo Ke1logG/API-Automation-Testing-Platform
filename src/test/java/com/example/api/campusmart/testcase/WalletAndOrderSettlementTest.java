@@ -4,6 +4,7 @@ import com.example.api.campusmart.api.AuthApi;
 import com.example.api.campusmart.api.GoodsApi;
 import com.example.api.campusmart.api.OrderApi;
 import com.example.api.campusmart.api.PaymentApi;
+import com.example.api.campusmart.api.WalletApi;
 import com.example.api.campusmart.common.ResultCode;
 import com.example.api.campusmart.context.AccountContext;
 import com.example.api.campusmart.context.TestAccount;
@@ -156,10 +157,83 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         assertThat(detailResult.getData().getStatus()).isEqualTo("PAID");
     }
 
+    @Test
+    @Story("提现成功")
+    @Severity(SeverityLevel.CRITICAL)
+    @DisplayName("卖家提现成功")
+    void shouldWithdrawSuccessfully() {
+        String sellerToken = AccountContext.getSeller().getToken();
+        Long sellerId = AccountContext.getSeller().getUserId();
+
+        UserWallet walletBefore = walletDbService.getByUserId(sellerId);
+        BigDecimal balanceBefore = walletBefore == null ? BigDecimal.ZERO : walletBefore.getBalance();
+
+        BigDecimal amount = prepareSellerBalance();
+
+        Result<Boolean> result = WalletApi.withdraw(sellerToken, amount, "test@alipay.com");
+        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        assertThat(result.getData()).isTrue();
+
+        UserWallet walletAfter = walletDbService.getByUserId(sellerId);
+        assertThat(walletAfter.getBalance()).isEqualByComparingTo(balanceBefore);
+
+        List<WalletFlow> flows = walletFlowDbService.listByUserId(sellerId);
+        boolean existsWithdrawFlow = flows.stream().anyMatch(flow ->
+                "WITHDRAW".equals(flow.getFlowType())
+                        && amount.negate().compareTo(flow.getAmount()) == 0
+                        && balanceBefore.compareTo(flow.getBalance()) == 0);
+        assertThat(existsWithdrawFlow).isTrue();
+    }
+
+    @Test
+    @Story("提现异常")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("余额不足时提现失败")
+    void shouldRejectWithdrawWhenBalanceInsufficient() {
+        // 先触发钱包创建，避免 withdraw 事务回滚后钱包不存在
+        WalletApi.getWallet(thirdAccount.getToken());
+
+        Result<Boolean> result = WalletApi.withdraw(
+                thirdAccount.getToken(), new BigDecimal("100"), "test@alipay.com");
+
+        assertThat(result.getCode()).isEqualTo(ResultCode.WALLET_BALANCE_INSUFFICIENT.getCode());
+
+        UserWallet wallet = walletDbService.getByUserId(thirdAccount.getUserId());
+        assertThat(wallet).isNotNull();
+        assertThat(wallet.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    @Story("提现异常")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("提现金额非法时失败")
+    void shouldRejectWithdrawWithInvalidAmount() {
+        Result<Boolean> zeroResult = WalletApi.withdraw(
+                thirdAccount.getToken(), BigDecimal.ZERO, "test@alipay.com");
+        assertThat(zeroResult.getCode()).isEqualTo(ResultCode.WITHDRAW_AMOUNT_INVALID.getCode());
+
+        Result<Boolean> negativeResult = WalletApi.withdraw(
+                thirdAccount.getToken(), new BigDecimal("-1"), "test@alipay.com");
+        assertThat(negativeResult.getCode()).isEqualTo(ResultCode.WITHDRAW_AMOUNT_INVALID.getCode());
+    }
 
 
 
 
+
+
+
+
+
+
+    
+    private BigDecimal prepareSellerBalance() {
+        OrderData orderData = createIndependentPaidOrder();
+        Result<Boolean> confirmResult = OrderApi.confirmOrder(
+                AccountContext.getBuyer().getToken(), orderData.orderId);
+        assertThat(confirmResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        return orderData.amount;
+    }
 
     private OrderData createIndependentPaidOrder() {
         OrderData orderData = createIndependentOrderWithPayment();
