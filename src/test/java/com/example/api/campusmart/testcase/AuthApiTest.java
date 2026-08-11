@@ -9,6 +9,8 @@ import com.example.api.campusmart.util.RandomUtil;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,43 +76,33 @@ public class AuthApiTest {
         assertThat(result.getData()).isNotBlank();
     }
 
-    @Test
+    @ParameterizedTest(name = "{3}")
+    @CsvSource(delimiter = '|', value = {
+            "valid | wrong_password | ACCOUNT_ERROR | 登录失败-密码错误",
+            "invalid | any_password | ACCOUNT_NOT_EXIST_ERROR | 登录失败-账号不存在"
+    })
     @Story("用户登录")
-    @DisplayName("登录失败-密码错误")
     @Severity(SeverityLevel.NORMAL)
-    @Description("使用错误的密码登录，期望返回用户名或密码错误")
-    void shouldFailToLoginWithWrongPassword() {
-        RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
-
-        Result<Void> registerResult = AuthApi.register(registerRequest);
-        assertThat(registerResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        assertThat(registerResult.getMessage()).isEqualTo(ResultCode.SUCCESS.getMessage());
+    @DisplayName("登录失败场景")
+    @Description("使用不同异常输入登录，期望返回对应错误码")
+    void shouldFailToLogin(String userExistsFlag, String password, ResultCode expectedCode, String description) {
+        String username;
+        if ("valid".equals(userExistsFlag)) {
+            RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
+            AuthApi.register(registerRequest);
+            username = registerRequest.getUsername();
+        } else {
+            username = RandomUtil.randomUsername();
+        }
 
         LoginRequest loginRequest = LoginRequest.builder()
-                .username(registerRequest.getUsername())
-                .password("wrong_password")
+                .username(username)
+                .password(password)
                 .build();
 
         Result<String> result = AuthApi.login(loginRequest);
 
-        assertThat(result.getCode()).isEqualTo(ResultCode.ACCOUNT_ERROR.getCode());
-        assertThat(result.getMessage()).isEqualTo(ResultCode.ACCOUNT_ERROR.getMessage());
-    }
-
-    @Test
-    @Story("用户登录")
-    @DisplayName("登录失败-账号不存在")
-    @Severity(SeverityLevel.NORMAL)
-    @Description("使用不存在的用户名登录，期望返回账号不存在")
-    void shouldFailToLoginWhenUserNotExists() {
-        LoginRequest loginRequest = LoginRequest.builder()
-                .username(RandomUtil.randomUsername())
-                .password("any_password")
-                .build();
-
-        Result<String> result = AuthApi.login(loginRequest);
-
-        assertThat(result.getCode()).isEqualTo(ResultCode.ACCOUNT_NOT_EXIST_ERROR.getCode());
-        assertThat(result.getMessage()).isEqualTo(ResultCode.ACCOUNT_NOT_EXIST_ERROR.getMessage());
+        assertThat(result.getCode()).isEqualTo(expectedCode.getCode());
+        assertThat(result.getMessage()).isEqualTo(expectedCode.getMessage());
     }
 }
