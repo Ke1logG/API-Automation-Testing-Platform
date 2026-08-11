@@ -21,3 +21,6 @@ allure-report/
 # 测试报告
 reports/
 surefire-reports/
+
+# 本地数据库配置文件
+**/application-local.properties
