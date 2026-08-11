@@ -12,6 +12,8 @@ import com.example.api.campusmart.util.RandomUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -148,41 +150,28 @@ public class GoodsApiTest extends BaseTest {
         assertThat(result.getCode()).isEqualTo(ResultCode.TOKEN_INVALID.getCode());
     }
 
-    @Test
-    @DisplayName("商品标题为空时发布失败")
-    void shouldRejectInvalidGoodsTitle() {
+    @ParameterizedTest(name = "{3}")
+    @CsvSource(delimiter = '|', value = {
+            "empty_title | 100 | GOODS_TITLE_EMPTY | 商品标题为空时发布失败",
+            "negative_price | -1 | GOODS_PRICE_ILLEGAL | 商品价格为负数时发布失败"
+    })
+    @DisplayName("商品参数校验失败")
+    void shouldRejectInvalidGoodsParams(String invalidScenarios, Long price, ResultCode expectedCode, String description) {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
 
+        String title = "empty_title".equals(invalidScenarios) ? "" : RandomUtil.randomGoodsTitle();
+
         GoodsAddRequest invalidRequest = GoodsAddRequest.builder()
                 .publishUserID(sellerId)
-                .title("")
+                .title(title)
                 .appearance("九成新")
                 .itemDescription("无效商品")
-                .price(100L)
+                .price(price)
                 .build();
 
         Result<Long> result = GoodsApi.addGoods(sellerToken, invalidRequest);
 
-        assertThat(result.getCode()).isEqualTo(ResultCode.GOODS_TITLE_EMPTY.getCode());
-    }
-
-    @Test
-    @DisplayName("商品价格为负数时发布失败")
-    void shouldRejectInvalidGoodsPrice() {
-        String sellerToken = AccountContext.getSeller().getToken();
-        Long sellerId = AccountContext.getSeller().getUserId();
-
-        GoodsAddRequest invalidRequest = GoodsAddRequest.builder()
-                .publishUserID(sellerId)
-                .title(RandomUtil.randomGoodsTitle())
-                .appearance("九成新")
-                .itemDescription("无效商品")
-                .price(-1L)
-                .build();
-
-        Result<Long> result = GoodsApi.addGoods(sellerToken, invalidRequest);
-
-        assertThat(result.getCode()).isEqualTo(ResultCode.GOODS_PRICE_ILLEGAL.getCode());
+        assertThat(result.getCode()).isEqualTo(expectedCode.getCode());
     }
 }
