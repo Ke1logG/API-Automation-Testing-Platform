@@ -19,6 +19,7 @@ import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.dto.trade.PaymentVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
@@ -64,6 +65,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("确认收货成功")
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("模拟支付成功后买家确认收货成功")
+    @Description("模拟支付成功后买家确认收货，期望订单状态变为 SETTLED")
     void shouldConfirmReceiptAfterSimulatedPayment() {
         OrderData orderData = createIndependentPaidOrder();
 
@@ -82,6 +84,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("钱包余额结算")
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("确认收货后卖家钱包余额增加")
+    @Description("买家确认收货后，卖家钱包余额应增加订单金额")
     void shouldIncreaseSellerWalletBalanceAfterConfirm() {
         OrderData orderData = createIndependentPaidOrder();
         String sellerToken = AccountContext.getSeller().getToken();
@@ -100,6 +103,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("钱包流水记录")
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("确认收货后生成卖家收入流水")
+    @Description("买家确认收货后，应生成卖家 INCOME 流水记录")
     void shouldCreateSellerIncomeFlowAfterConfirm() {
         OrderData orderData = createIndependentPaidOrder();
         String sellerToken = AccountContext.getSeller().getToken();
@@ -117,9 +121,10 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     }
 
     @Test
-    @Story("状态机校验")
+    @Story("确认收货异常")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("未支付订单不能确认收货")
+    @Description("对未支付订单执行确认收货，期望返回 ORDER_CONFIRM_NOT_ALLOWED")
     void shouldRejectConfirmForUnpaidOrder() {
         OrderData orderData = createIndependentOrderWithPayment();
         String buyerToken = AccountContext.getBuyer().getToken();
@@ -133,9 +138,10 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     }
 
     @Test
-    @Story("权限校验")
+    @Story("确认收货异常")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("非订单参与者不能确认收货")
+    @Description("非订单参与者执行确认收货，期望返回 ORDER_NO_PERMISSION")
     void shouldRejectConfirmByNonParticipant() {
         OrderData orderData = createIndependentPaidOrder();
 
@@ -153,6 +159,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("提现成功")
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("卖家提现成功")
+    @Description("卖家提现全部余额，期望余额扣减并生成 WITHDRAW 流水")
     void shouldWithdrawSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
 
@@ -178,6 +185,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("提现异常")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("余额不足时提现失败")
+    @Description("余额不足时执行提现，期望返回 WALLET_BALANCE_INSUFFICIENT")
     void shouldRejectWithdrawWhenBalanceInsufficient() {
         // 后端是钱包懒加载，所以先触发钱包创建，避免 withdraw 事务回滚后钱包不存在
         WalletApi.getWallet(thirdAccount.getToken());
@@ -214,6 +222,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Story("提现异常")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("提现金额非法时失败")
+    @Description("使用 0 或负数金额提现，期望返回 WITHDRAW_AMOUNT_INVALID")
     void shouldRejectWithdrawWithInvalidAmount(String caseName , BigDecimal amount , ResultCode expectedCode, String description) {
         Result<Boolean> result = WalletApi.withdraw(thirdAccount.getToken(), amount, "test@alipay.com");
         assertThat(result.getCode()).isEqualTo(expectedCode.getCode());

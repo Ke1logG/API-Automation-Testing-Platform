@@ -10,8 +10,12 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.dto.trade.PaymentVo;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +52,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
+    @Story("创建支付单")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("创建支付单成功")
+    @Description("买家为 CREATED 状态订单创建支付单，期望支付单状态为 PENDING")
     void shouldCreatePaymentSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
@@ -68,7 +75,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
+    @Story("查询支付单")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("根据订单 ID 查询支付单成功")
+    @Description("根据订单 ID 查询支付单，期望返回正确支付单信息")
     void shouldGetPaymentByOrderIdSuccessfully() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -81,7 +91,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("重复创建同一订单的支付单返回已有支付单")
+    @Story("创建支付单")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("重复创建同一订单支付单返回已有支付单")
+    @Description("重复为同一订单创建支付单，期望返回已有支付单")
     void shouldReturnExistingPaymentWhenCreateDuplicate() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -92,7 +105,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
+    @Story("权限校验")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("非买家创建支付单失败")
+    @Description("非买家为订单创建支付单，期望返回 ORDER_NO_PERMISSION")
     void shouldRejectPaymentCreationByNonBuyer() {
         String sellerToken = AccountContext.getSeller().getToken();
 
@@ -102,7 +118,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
+    @Story("状态机校验")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("非 CREATED 状态订单不能创建支付单")
+    @Description("为已取消订单创建支付单，期望返回 ORDER_STATUS_ERROR")
     void shouldRejectPaymentCreationForNonCreatedOrder() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
@@ -119,7 +138,10 @@ public class PaymentApiTest extends BaseTest {
     }
 
     @Test
+    @Story("取消支付单")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("取消订单后支付单变为 CLOSED")
+    @Description("买家取消订单后，关联支付单状态应变为 CLOSED")
     void shouldClosePaymentWhenOrderCancelled() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();

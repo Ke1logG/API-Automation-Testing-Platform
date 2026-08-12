@@ -13,8 +13,12 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +56,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
+    @Story("创建订单")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("买家创建订单成功")
+    @Description("买家对商品创建订单，期望订单状态为 CREATED")
     void shouldCreateOrderSuccessfully() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -67,7 +74,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("买家不能购买自己发布的商品")
+    @Story("创建订单")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("买家购买自己发布的商品失败")
+    @Description("卖家尝试购买自己发布的商品，期望返回 GOODS_SELF_PURCHASE")
     void shouldRejectSelfPurchase() {
         String sellerToken = AccountContext.getSeller().getToken();
 
@@ -77,7 +87,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("重复创建同一商品的订单返回已有订单")
+    @Story("创建订单")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("重复创建同一商品订单返回已有订单")
+    @Description("买家重复创建同一商品的订单，期望返回已有订单")
     void shouldReturnExistingOrderWhenCreateDuplicate() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -88,7 +101,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
+    @Story("查询订单")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("查询订单详情成功")
+    @Description("订单参与者查询订单详情，期望返回正确订单信息")
     void shouldGetOrderDetailSuccessfully() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -102,7 +118,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("非订单参与者无法查看订单详情")
+    @Story("权限校验")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("非订单参与者查看订单详情失败")
+    @Description("非订单参与者查询订单详情，期望返回 ORDER_NO_PERMISSION")
     void shouldRejectOrderDetailForNonParticipant() {
         Result<OrderVo> result = OrderApi.getOrderDetail(thirdAccount.getToken(), sharedOrderId);
 
@@ -110,7 +129,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("买家订单列表包含订单")
+    @Story("查询订单")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("查询买家订单列表包含订单")
+    @Description("买家查询自己的订单列表，期望包含共享订单")
     void shouldListBuyerOrdersSuccessfully() {
         String buyerToken = AccountContext.getBuyer().getToken();
 
@@ -125,7 +147,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("卖家订单列表包含订单")
+    @Story("查询订单")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("查询卖家订单列表包含订单")
+    @Description("卖家查询自己的订单列表，期望包含共享订单")
     void shouldListSellerOrdersSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
 
@@ -140,7 +165,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
+    @Story("取消订单")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("取消 CREATED 订单成功")
+    @Description("买家取消 CREATED 状态订单，期望订单状态变为 CANCELLED")
     void shouldCancelOrderSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
@@ -161,7 +189,10 @@ public class OrderApiTest extends BaseTest {
     }
 
     @Test
+    @Story("状态机校验")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("取消已取消的订单失败")
+    @Description("买家重复取消已取消的订单，期望返回 ORDER_CANCEL_NOT_ALLOWED")
     void shouldRejectCancelNonCreatedOrder() {
         String sellerToken = AccountContext.getSeller().getToken();
         Long sellerId = AccountContext.getSeller().getUserId();
