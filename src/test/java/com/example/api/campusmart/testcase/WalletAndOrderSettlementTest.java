@@ -11,8 +11,6 @@ import com.example.api.campusmart.context.TestAccount;
 import com.example.api.campusmart.db.entity.UserWallet;
 import com.example.api.campusmart.db.entity.WalletFlow;
 import com.example.api.campusmart.db.service.PaymentDbService;
-import com.example.api.campusmart.db.service.WalletDbService;
-import com.example.api.campusmart.db.service.WalletFlowDbService;
 import com.example.api.campusmart.dto.LoginRequest;
 import com.example.api.campusmart.dto.RegisterRequest;
 import com.example.api.campusmart.dto.Result;
@@ -53,12 +51,6 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Autowired
     private PaymentDbService paymentDbService;
 
-    @Autowired
-    private WalletDbService walletDbService;
-
-    @Autowired
-    private WalletFlowDbService walletFlowDbService;
-
     private TestAccount thirdAccount;
 
     @BeforeAll
@@ -90,18 +82,16 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @DisplayName("确认收货后卖家钱包余额增加")
     void shouldIncreaseSellerWalletBalanceAfterConfirm() {
         OrderData orderData = createIndependentPaidOrder();
-        Long sellerId = AccountContext.getSeller().getUserId();
+        String sellerToken = AccountContext.getSeller().getToken();
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        UserWallet walletBefore = walletDbService.getByUserId(sellerId);
-        BigDecimal balanceBefore = walletBefore == null ? BigDecimal.ZERO : walletBefore.getBalance();
+        BigDecimal balanceBefore = WalletApi.getWallet(sellerToken).getData().getBalance();
 
         Result<Boolean> confirmResult = OrderApi.confirmOrder(buyerToken, orderData.orderId);
         assertThat(confirmResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
 
-        UserWallet walletAfter = walletDbService.getByUserId(sellerId);
-        assertThat(walletAfter).isNotNull();
-        assertThat(walletAfter.getBalance()).isEqualByComparingTo(balanceBefore.add(orderData.amount));
+        BigDecimal balanceAfter = WalletApi.getWallet(sellerToken).getData().getBalance();
+        assertThat(balanceAfter).isEqualByComparingTo(balanceBefore.add(orderData.amount));
     }
 
     @Test
@@ -110,13 +100,13 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @DisplayName("确认收货后生成卖家收入流水")
     void shouldCreateSellerIncomeFlowAfterConfirm() {
         OrderData orderData = createIndependentPaidOrder();
-        Long sellerId = AccountContext.getSeller().getUserId();
+        String sellerToken = AccountContext.getSeller().getToken();
         String buyerToken = AccountContext.getBuyer().getToken();
 
         Result<Boolean> confirmResult = OrderApi.confirmOrder(buyerToken, orderData.orderId);
         assertThat(confirmResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
 
-        List<WalletFlow> flows = walletFlowDbService.listByUserId(sellerId);
+        List<WalletFlow> flows = WalletApi.listFlows(sellerToken).getData();
         boolean existsIncomeFlow = flows.stream().anyMatch(flow ->
                 "INCOME".equals(flow.getFlowType())
                         && orderData.orderId.equals(flow.getRelatedID())
@@ -163,21 +153,18 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @DisplayName("卖家提现成功")
     void shouldWithdrawSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
-        Long sellerId = AccountContext.getSeller().getUserId();
 
-        UserWallet walletBefore = walletDbService.getByUserId(sellerId);
-        BigDecimal balanceBefore = walletBefore == null ? BigDecimal.ZERO : walletBefore.getBalance();
-
+        BigDecimal balanceBefore = WalletApi.getWallet(sellerToken).getData().getBalance();
         BigDecimal amount = prepareSellerBalance();
 
         Result<Boolean> result = WalletApi.withdraw(sellerToken, amount, "test@alipay.com");
         assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
         assertThat(result.getData()).isTrue();
 
-        UserWallet walletAfter = walletDbService.getByUserId(sellerId);
-        assertThat(walletAfter.getBalance()).isEqualByComparingTo(balanceBefore);
+        BigDecimal balanceAfter = WalletApi.getWallet(sellerToken).getData().getBalance();
+        assertThat(balanceAfter).isEqualByComparingTo(balanceBefore);
 
-        List<WalletFlow> flows = walletFlowDbService.listByUserId(sellerId);
+        List<WalletFlow> flows = WalletApi.listFlows(sellerToken).getData();
         boolean existsWithdrawFlow = flows.stream().anyMatch(flow ->
                 "WITHDRAW".equals(flow.getFlowType())
                         && amount.negate().compareTo(flow.getAmount()) == 0
@@ -190,7 +177,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("余额不足时提现失败")
     void shouldRejectWithdrawWhenBalanceInsufficient() {
-        // 先触发钱包创建，避免 withdraw 事务回滚后钱包不存在
+        // 后端是钱包懒加载，所以先触发钱包创建，避免 withdraw 事务回滚后钱包不存在
         WalletApi.getWallet(thirdAccount.getToken());
 
         Result<Boolean> result = WalletApi.withdraw(
@@ -198,9 +185,8 @@ public class WalletAndOrderSettlementTest extends BaseTest {
 
         assertThat(result.getCode()).isEqualTo(ResultCode.WALLET_BALANCE_INSUFFICIENT.getCode());
 
-        UserWallet wallet = walletDbService.getByUserId(thirdAccount.getUserId());
-        assertThat(wallet).isNotNull();
-        assertThat(wallet.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+        BigDecimal balance = WalletApi.getWallet(thirdAccount.getToken()).getData().getBalance();
+        assertThat(balance).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
