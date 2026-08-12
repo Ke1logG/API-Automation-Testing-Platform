@@ -208,20 +208,6 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         assertThat(balance).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
-    /* 
-    @Test
-    @Story("提现异常")
-    @Severity(SeverityLevel.NORMAL)
-    @DisplayName("提现金额非法时失败")
-    void shouldRejectWithdrawWithInvalidAmount() {
-        Result<Boolean> zeroResult = WalletApi.withdraw(
-                thirdAccount.getToken(), BigDecimal.ZERO, "test@alipay.com");
-        assertThat(zeroResult.getCode()).isEqualTo(ResultCode.WITHDRAW_AMOUNT_INVALID.getCode());
-
-        Result<Boolean> negativeResult = WalletApi.withdraw(
-                thirdAccount.getToken(), new BigDecimal("-1"), "test@alipay.com");
-        assertThat(negativeResult.getCode()).isEqualTo(ResultCode.WITHDRAW_AMOUNT_INVALID.getCode());
-    }*/
 
     @ParameterizedTest(name = "{3}")
     @CsvSource(delimiter = '|',value = {
