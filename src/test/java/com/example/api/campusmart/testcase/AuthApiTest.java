@@ -78,16 +78,16 @@ public class AuthApiTest {
 
     @ParameterizedTest(name = "{3}")
     @CsvSource(delimiter = '|', value = {
-            "valid | wrong_password | ACCOUNT_ERROR | 登录失败-密码错误",
-            "invalid | any_password | ACCOUNT_NOT_EXIST_ERROR | 登录失败-账号不存在"
+            "registered | wrong_password | ACCOUNT_ERROR | 登录失败-密码错误",
+            "unregistered | any_password | ACCOUNT_NOT_EXIST_ERROR | 登录失败-账号不存在"
     })
     @Story("用户登录")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("登录失败场景")
     @Description("使用不同异常输入登录，期望返回对应错误码")
-    void shouldFailToLogin(String userExistsFlag, String password, ResultCode expectedCode, String description) {
+    void shouldFailToLogin(String failedCase, String password, ResultCode expectedCode, String description) {
         String username;
-        if ("valid".equals(userExistsFlag)) {
+        if ("registered".equals(failedCase)) {
             RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
             AuthApi.register(registerRequest);
             username = registerRequest.getUsername();

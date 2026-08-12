@@ -225,7 +225,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
 
 
 
-
+    //辅助方法
     
     private BigDecimal prepareSellerBalance() {
         OrderData orderData = createIndependentPaidOrder();
