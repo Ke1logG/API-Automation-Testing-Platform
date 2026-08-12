@@ -13,6 +13,8 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+@Epic("交易链路")
+@Feature("订单管理")
 @DisplayName("订单接口测试")
 public class OrderApiTest extends BaseTest {
 

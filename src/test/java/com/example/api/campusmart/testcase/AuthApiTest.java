@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * 登录注册接口测试用例
  */
-@Epic("CampusMart 接口自动化测试")
-@Feature("登录注册模块")
+@Epic("用户模块")
+@Feature("登录注册")
 public class AuthApiTest {
 
     @Test

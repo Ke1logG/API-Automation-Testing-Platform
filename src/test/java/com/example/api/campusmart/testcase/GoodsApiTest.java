@@ -9,6 +9,8 @@ import com.example.api.campusmart.dto.goods.GoodsDetail;
 import com.example.api.campusmart.dto.goods.GoodsVo;
 import com.example.api.campusmart.dto.goods.PageResult;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * 商品发布与浏览链路测试
  */
+@Epic("商品模块")
+@Feature("商品发布与浏览")
 @DisplayName("商品接口测试")
 public class GoodsApiTest extends BaseTest {
 
