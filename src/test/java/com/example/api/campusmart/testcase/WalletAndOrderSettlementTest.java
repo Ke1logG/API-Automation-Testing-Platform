@@ -25,6 +25,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +61,13 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @BeforeAll
     void prepareThirdAccount() {
         thirdAccount = registerThirdAccount();
+    }
+
+    @AfterAll
+    void cleanupThirdAccount() {
+        if (thirdAccount != null) {
+            testDataCleanupService.cleanupByUserIds(List.of(thirdAccount.getUserId()));
+        }
     }
 
     @Test

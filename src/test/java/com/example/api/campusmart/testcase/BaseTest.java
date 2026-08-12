@@ -4,6 +4,8 @@ import com.example.api.campusmart.api.AuthApi;
 import com.example.api.campusmart.common.ResultCode;
 import com.example.api.campusmart.context.AccountContext;
 import com.example.api.campusmart.context.TestAccount;
+import com.example.api.campusmart.db.MyBatisPlusConfig;
+import com.example.api.campusmart.db.service.TestDataCleanupService;
 import com.example.api.campusmart.dto.LoginRequest;
 import com.example.api.campusmart.dto.RegisterRequest;
 import com.example.api.campusmart.dto.Result;
@@ -11,27 +13,41 @@ import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * 测试基类：每个继承它的测试类在 @BeforeAll 阶段创建一组新的买家和卖家账号
- * 账号信息通过 ThreadLocal 在类内共享，不同测试类之间账号互相隔离
- */
+
+@SpringBootTest(classes = MyBatisPlusConfig.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
 
+    @Autowired
+    protected TestDataCleanupService testDataCleanupService;
+
     @BeforeAll
-    static void setupAccounts() {
+    void setupAccounts() {
         AccountContext.setSeller(createAccount());
         AccountContext.setBuyer(createAccount());
     }
 
     @AfterAll
-    static void cleanupAccounts() {
+    void cleanupAccounts() {
+        TestAccount seller = AccountContext.getSeller();
+        TestAccount buyer = AccountContext.getBuyer();
+        if (seller != null && buyer != null) {
+            List<Long> userIds = Arrays.asList(seller.getUserId(), buyer.getUserId());
+            testDataCleanupService.cleanupByUserIds(userIds);
+        }
         AccountContext.clear();
     }
 
-    private static TestAccount createAccount() {
+    private TestAccount createAccount() {
         RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
 
         Result<Void> registerResult = AuthApi.register(registerRequest);
