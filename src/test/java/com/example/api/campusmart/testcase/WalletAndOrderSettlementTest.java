@@ -29,12 +29,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -47,9 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Epic("交易链路")
 @Feature("确认收货与钱包结算")
-@SpringBootTest(classes = com.example.api.campusmart.db.MyBatisPlusConfig.class)
-@ActiveProfiles("local")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("确认收货与钱包结算测试")
 public class WalletAndOrderSettlementTest extends BaseTest {
 
