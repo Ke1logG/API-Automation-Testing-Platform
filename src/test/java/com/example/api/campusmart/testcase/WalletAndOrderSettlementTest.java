@@ -28,6 +28,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -189,6 +191,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         assertThat(balance).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
+    /* 
     @Test
     @Story("提现异常")
     @Severity(SeverityLevel.NORMAL)
@@ -201,9 +204,20 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         Result<Boolean> negativeResult = WalletApi.withdraw(
                 thirdAccount.getToken(), new BigDecimal("-1"), "test@alipay.com");
         assertThat(negativeResult.getCode()).isEqualTo(ResultCode.WITHDRAW_AMOUNT_INVALID.getCode());
+    }*/
+
+    @ParameterizedTest(name = "{3}")
+    @CsvSource(delimiter = '|',value = {
+            "zeroCase | BigDecimal.ZERO | WITHDRAW_AMOUNT_INVALID | 提现失败-提现金额为零",
+            "negativeCase | -1 | WITHDRAW_AMOUNT_INVALID | 提现失败-提现金额为负"
+    })
+    @Story("提现异常")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("提现金额非法时失败")
+    void shouldRejectWithdrawWithInvalidAmount(String caseName , BigDecimal amount , ResultCode expectedCode, String description) {
+        Result<Boolean> result = WalletApi.withdraw(thirdAccount.getToken(), amount, "test@alipay.com");
+        assertThat(result.getCode()).isEqualTo(expectedCode);
     }
-
-
 
 
 
