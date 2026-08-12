@@ -19,12 +19,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Epic("用户模块")
 @Feature("登录注册")
+@DisplayName("登陆注册接口测试")
 public class AuthApiTest {
 
     @Test
     @Story("用户注册")
     @DisplayName("注册新用户成功")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.BLOCKER)
     @Description("使用合法参数注册新用户，期望返回成功")
     void shouldRegisterNewUserSuccessfully() {
         RegisterRequest request = RandomUtil.randomRegisterRequest();
@@ -56,7 +57,7 @@ public class AuthApiTest {
     @Test
     @Story("用户登录")
     @DisplayName("登录成功")
-    @Severity(SeverityLevel.CRITICAL)
+    @Severity(SeverityLevel.BLOCKER)
     @Description("使用正确的用户名密码登录，期望返回 JWT token")
     void shouldLoginSuccessfully() {
         RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
