@@ -208,7 +208,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
 
     @ParameterizedTest(name = "{3}")
     @CsvSource(delimiter = '|',value = {
-            "zeroCase | BigDecimal.ZERO | WITHDRAW_AMOUNT_INVALID | 提现失败-提现金额为零",
+            "zeroCase | 0 | WITHDRAW_AMOUNT_INVALID | 提现失败-提现金额为零",
             "negativeCase | -1 | WITHDRAW_AMOUNT_INVALID | 提现失败-提现金额为负"
     })
     @Story("提现异常")
@@ -216,7 +216,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @DisplayName("提现金额非法时失败")
     void shouldRejectWithdrawWithInvalidAmount(String caseName , BigDecimal amount , ResultCode expectedCode, String description) {
         Result<Boolean> result = WalletApi.withdraw(thirdAccount.getToken(), amount, "test@alipay.com");
-        assertThat(result.getCode()).isEqualTo(expectedCode);
+        assertThat(result.getCode()).isEqualTo(expectedCode.getCode());
     }
 
 
