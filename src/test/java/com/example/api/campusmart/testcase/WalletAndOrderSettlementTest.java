@@ -190,7 +190,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     @DisplayName("余额不足时提现失败")
     @Description("余额不足时执行提现，期望返回 WALLET_BALANCE_INSUFFICIENT")
     void shouldRejectWithdrawWhenBalanceInsufficient() {
-        // 后端是钱包懒加载，所以先触发钱包创建，避免 withdraw 事务回滚后钱包不存在
+        // 后端是钱包懒加载，所以先触发钱包创建，避免钱包不存在
         WalletApi.getWallet(thirdAccount.getToken());
 
         Result<Boolean> result = WalletApi.withdraw(
