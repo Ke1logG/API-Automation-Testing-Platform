@@ -1,6 +1,6 @@
 # API-Automation-Testing-Platform 接口自动化测试平台
 
-> 面向 Spring Boot 后端服务的接口自动化测试项目，覆盖核心链路：登录注册、商品发布、订单创建、支付、确认收货、钱包结算。
+> 面向 Spring Boot 后端服务的接口自动化测试项目，覆盖核心链路：登录注册、商品发布、订单创建、支付、确认收货、钱包结算。  
 > 采用 JUnit 5 + REST Assured + Allure 构建，结合 MyBatis-Plus 实现灰盒测试与测试数据清理。
 
 ---
