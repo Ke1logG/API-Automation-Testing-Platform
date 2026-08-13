@@ -13,11 +13,13 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -175,17 +177,24 @@ public class OrderApiTest extends BaseTest {
         String buyerToken = AccountContext.getBuyer().getToken();
 
         Long goodsId = publishIndependentGoods(sellerToken, sellerId);
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
-        Long orderId = createResult.getData().getOrderID();
 
-        assertThat(createResult.getData().getStatus()).isEqualTo("CREATED");
+        Long orderId = Allure.step("创建独立订单", () -> {
+            Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
+            assertThat(createResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            assertThat(createResult.getData().getStatus()).isEqualTo("CREATED");
+            return createResult.getData().getOrderID();
+        });
 
-        Result<Boolean> cancelResult = OrderApi.cancelOrder(buyerToken, orderId);
-        assertThat(cancelResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        assertThat(cancelResult.getData()).isTrue();
+        Allure.step("取消订单", () -> {
+            Result<Boolean> cancelResult = OrderApi.cancelOrder(buyerToken, orderId);
+            assertThat(cancelResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            assertThat(cancelResult.getData()).isTrue();
+        });
 
-        Result<OrderVo> detailResult = OrderApi.getOrderDetail(buyerToken, orderId);
-        assertThat(detailResult.getData().getStatus()).isEqualTo("CANCELLED");
+        Allure.step("校验订单状态变为 CANCELLED", () -> {
+            Result<OrderVo> detailResult = OrderApi.getOrderDetail(buyerToken, orderId);
+            assertThat(detailResult.getData().getStatus()).isEqualTo("CANCELLED");
+        });
     }
 
     @Test
@@ -207,6 +216,10 @@ public class OrderApiTest extends BaseTest {
         assertThat(cancelAgainResult.getCode()).isEqualTo(ResultCode.ORDER_CANCEL_NOT_ALLOWED.getCode());
     }
 
+
+
+
+    @Step("发布独立商品")
     private static Long publishIndependentGoods(String sellerToken, Long sellerId) {
         GoodsAddRequest request = RandomUtil.randomGoodsAddRequest(sellerId);
         Result<Long> result = GoodsApi.addGoods(sellerToken, request);

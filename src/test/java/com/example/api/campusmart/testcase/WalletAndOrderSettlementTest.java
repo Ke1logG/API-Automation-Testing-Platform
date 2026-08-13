@@ -19,11 +19,13 @@ import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.dto.trade.PaymentVo;
 import com.example.api.campusmart.util.JwtUtil;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,13 +76,16 @@ public class WalletAndOrderSettlementTest extends BaseTest {
 
         String buyerToken = AccountContext.getBuyer().getToken();
 
-        Result<Boolean> confirmResult = OrderApi.confirmOrder(buyerToken, orderData.orderId);
+        Allure.step("买家确认收货", () -> {
+            Result<Boolean> confirmResult = OrderApi.confirmOrder(buyerToken, orderData.orderId);
+            assertThat(confirmResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            assertThat(confirmResult.getData()).isTrue();
+        });
 
-        assertThat(confirmResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        assertThat(confirmResult.getData()).isTrue();
-
-        Result<OrderVo> detailResult = OrderApi.getOrderDetail(buyerToken, orderData.orderId);
-        assertThat(detailResult.getData().getStatus()).isEqualTo("SETTLED");
+        Allure.step("校验订单状态为 SETTLED", () -> {
+            Result<OrderVo> detailResult = OrderApi.getOrderDetail(buyerToken, orderData.orderId);
+            assertThat(detailResult.getData().getStatus()).isEqualTo("SETTLED");
+        });
     }
 
     @Test
@@ -166,22 +171,28 @@ public class WalletAndOrderSettlementTest extends BaseTest {
     void shouldWithdrawSuccessfully() {
         String sellerToken = AccountContext.getSeller().getToken();
 
-        BigDecimal balanceBefore = WalletApi.getWallet(sellerToken).getData().getBalance();
+        BigDecimal balanceBefore = Allure.step("查询提现前余额",() -> WalletApi.getWallet(sellerToken).getData().getBalance());
         BigDecimal amount = prepareSellerBalance();
 
-        Result<Boolean> result = WalletApi.withdraw(sellerToken, amount, "test@alipay.com");
-        assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
-        assertThat(result.getData()).isTrue();
+        Allure.step("发起提现请求", () -> {
+            Result<Boolean> result = WalletApi.withdraw(sellerToken, amount, "test@alipay.com");
+            assertThat(result.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            assertThat(result.getData()).isTrue();
+        });
 
-        BigDecimal balanceAfter = WalletApi.getWallet(sellerToken).getData().getBalance();
-        assertThat(balanceAfter).isEqualByComparingTo(balanceBefore);
+        Allure.step("校验余额扣减", () -> {
+            BigDecimal balanceAfter = WalletApi.getWallet(sellerToken).getData().getBalance();
+            assertThat(balanceAfter).isEqualByComparingTo(balanceBefore);
+        });
 
-        List<WalletFlow> flows = WalletApi.listFlows(sellerToken).getData();
-        boolean existsWithdrawFlow = flows.stream().anyMatch(flow ->
-                "WITHDRAW".equals(flow.getFlowType())
-                        && amount.negate().compareTo(flow.getAmount()) == 0
-                        && balanceBefore.compareTo(flow.getBalance()) == 0);
-        assertThat(existsWithdrawFlow).isTrue();
+        Allure.step("校验流水记录生成", () -> {
+            List<WalletFlow> flows = WalletApi.listFlows(sellerToken).getData();
+            boolean existsWithdrawFlow = flows.stream().anyMatch(flow ->
+                    "WITHDRAW".equals(flow.getFlowType())
+                            && amount.negate().compareTo(flow.getAmount()) == 0
+                            && balanceBefore.compareTo(flow.getBalance()) == 0);
+            assertThat(existsWithdrawFlow).isTrue();
+        });
     }
 
     @Test
@@ -225,6 +236,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
 
     //辅助方法
     
+    @Step("准备卖家余额：下单→模拟支付→确认收货")
     private BigDecimal prepareSellerBalance() {
         OrderData orderData = createIndependentPaidOrder();
         Result<Boolean> confirmResult = OrderApi.confirmOrder(
@@ -233,6 +245,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         return orderData.amount;
     }
 
+    @Step("创建独立已支付订单")
     private OrderData createIndependentPaidOrder() {
         OrderData orderData = createIndependentOrderWithPayment();
         boolean simulated = paymentDbService.simulatePaid(orderData.orderId);
@@ -240,6 +253,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         return orderData;
     }
 
+    @Step("创建独立订单及支付单")
     private OrderData createIndependentOrderWithPayment() {
         TestAccount seller = AccountContext.getSeller();
         TestAccount buyer = AccountContext.getBuyer();
@@ -256,6 +270,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         return new OrderData(orderId, orderResult.getData().getAmount());
     }
 
+    @Step("发布独立测试商品")
     private static Long publishIndependentGoods(String sellerToken, Long sellerId) {
         GoodsAddRequest request = RandomUtil.randomGoodsAddRequest(sellerId);
         Result<Long> result = GoodsApi.addGoods(sellerToken, request);
@@ -263,6 +278,7 @@ public class WalletAndOrderSettlementTest extends BaseTest {
         return result.getData();
     }
 
+    @Step("准备第三者已登录账号")
     private static TestAccount registerThirdAccount() {
         RegisterRequest registerRequest = RandomUtil.randomRegisterRequest();
         Result<Void> registerResult = AuthApi.register(registerRequest);

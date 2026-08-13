@@ -10,11 +10,13 @@ import com.example.api.campusmart.dto.goods.GoodsAddRequest;
 import com.example.api.campusmart.dto.trade.OrderVo;
 import com.example.api.campusmart.dto.trade.PaymentVo;
 import com.example.api.campusmart.util.RandomUtil;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -148,20 +150,33 @@ public class PaymentApiTest extends BaseTest {
         String buyerToken = AccountContext.getBuyer().getToken();
 
         Long goodsId = publishIndependentGoods(sellerToken, sellerId);
-        Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
-        Long orderId = createResult.getData().getOrderID();
 
-        Result<PaymentVo> paymentResult = PaymentApi.createPayment(buyerToken, orderId);
-        Long paymentId = paymentResult.getData().getPaymentID();
-        assertThat(paymentResult.getData().getStatus()).isEqualTo("PENDING");
+        Long orderId = Allure.step("创建独立订单", () -> {
+            Result<OrderVo> createResult = OrderApi.createOrder(buyerToken, goodsId);
+            assertThat(createResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            return createResult.getData().getOrderID();
+        });
 
-        OrderApi.cancelOrder(buyerToken, orderId);
+        Long paymentId = Allure.step("创建支付单", () -> {
+            Result<PaymentVo> paymentResult = PaymentApi.createPayment(buyerToken, orderId);
+            assertThat(paymentResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+            assertThat(paymentResult.getData().getStatus()).isEqualTo("PENDING");
+            return paymentResult.getData().getPaymentID();
+        });
 
-        Result<PaymentVo> queryResult = PaymentApi.getPaymentByOrderId(buyerToken, orderId);
-        assertThat(queryResult.getData().getPaymentID()).isEqualTo(paymentId);
-        assertThat(queryResult.getData().getStatus()).isEqualTo("CLOSED");
+        Allure.step("取消订单", () -> {
+            Result<Boolean> cancelResult = OrderApi.cancelOrder(buyerToken, orderId);
+            assertThat(cancelResult.getCode()).isEqualTo(ResultCode.SUCCESS.getCode());
+        });
+
+        Allure.step("校验支付单状态变为 CLOSED", () -> {
+            Result<PaymentVo> queryResult = PaymentApi.getPaymentByOrderId(buyerToken, orderId);
+            assertThat(queryResult.getData().getPaymentID()).isEqualTo(paymentId);
+            assertThat(queryResult.getData().getStatus()).isEqualTo("CLOSED");
+        });
     }
 
+    @Step("发布独立商品")
     private static Long publishIndependentGoods(String sellerToken, Long sellerId) {
         GoodsAddRequest request = RandomUtil.randomGoodsAddRequest(sellerId);
         Result<Long> result = GoodsApi.addGoods(sellerToken, request);
