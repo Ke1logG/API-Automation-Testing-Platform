@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Epic("用户模块")
 @Feature("登录注册")
-@DisplayName("登陆注册接口测试")
+@DisplayName("登录注册接口测试")
 public class AuthApiTest {
 
     @Test

@@ -16,9 +16,46 @@
 - **可维护性**：API 层与后端接口一一对应，DTO、错误码、工具类分层清晰。
 - **可观测性**：Allure 报告按 Epic / Feature / Story / Severity / Description 统一分类，便于定位问题。
 
+---  
+
+  
+## 二、报告示例
+
+### 2.1 报告总览
+
+报告首页展示测试执行时间、用例总数、通过率以及按测试套件和 Epic 维度统计的分布情况。共 **38 条**用例，通过率 **100%**。
+
+<p align="center">
+  <img src="allure-picture/overview.png" width="85%" alt="Allure 报告总览"/>
+</p>
+
+### 2.2 功能分层（Behaviors）
+
+左侧按 `Epic → Feature → Story` 层级展示用例，右侧展示选中用例的详细步骤。下图以「卖家提现成功」为例。
+
+<p align="center">
+  <img src="allure-picture/behaviors.png" width="95%" alt="Allure Behaviors 功能分层"/>
+</p>
+
+### 2.3 测试图表
+
+图表页从状态、严重等级、执行耗时等维度对测试结果进行可视化统计。
+
+<p align="center">
+  <img src="allure-picture/graphs.png" width="85%" alt="Allure 测试图表"/>
+</p>
+
+### 2.4 用例详情
+
+用例详情页自动附加每个 HTTP 请求的请求参数、响应体和状态码（通过 `AllureRestAssured` 过滤器自动采集）。
+
+<p align="center">
+  <img src="allure-picture/testcase-detail.png" width="95%" alt="Allure 用例详情"/>
+</p>
+
 ---
 
-## 二、技术栈
+## 三、技术栈
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
@@ -32,7 +69,7 @@
 
 ---
 
-## 三、项目结构
+## 四、项目结构
 
 ```text
 src/test/java/com/example/api/campusmart/
@@ -79,15 +116,6 @@ src/test/resources/
 
 ---
   
-## 四、报告示例
-
-Allure 报告支持：
-
-- 按 Epic / Feature / Story 分层浏览用例；
-- 查看每个用例的请求参数、响应体、HTTP 状态码（通过 `AllureRestAssured` 自动附加）；
-- 按 Severity 筛选关键用例；
-
----
 
 ## 五、测试设计亮点
 
