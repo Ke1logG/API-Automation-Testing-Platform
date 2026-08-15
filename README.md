@@ -1,4 +1,4 @@
-# API-Automation-Testing-Platform 接口自动化测试平台
+# API-Automation-Testing-Platform 接口自动化测试项目
 
 > 面向 Spring Boot 后端服务的接口自动化测试项目，覆盖核心链路：登录注册、商品发布、订单创建、支付、确认收货、钱包结算。  
 > 采用 JUnit 5 + REST Assured + Allure 构建，结合 MyBatis-Plus 实现灰盒测试与测试数据清理。
@@ -113,8 +113,8 @@ src/test/java/com/example/api/campusmart/
     └── RandomUtil.java     # 随机测试数据生成工具类
 
 src/test/resources/
-├── application.properties           # 通用配置（含占位符，可提交 Git）
-├── application-local.properties     # 本地数据库配置（已加入 .gitignore）
+├── application.properties           # 通用配置
+├── application-local.properties     # 本地数据库配置
 ├── junit-platform.properties        # JUnit 5 显示名称生成器
 └── cases/
     └── auth/
