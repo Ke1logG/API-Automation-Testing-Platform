@@ -164,11 +164,15 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 
 ### 5.5 数据驱动测试
 
-使用 `@ParameterizedTest` + `@CsvSource` 对相似异常场景进行参数化，例如：
+项目使用两种数据驱动方式：
 
-- 登录失败：用户名/密码错误、用户不存在；
-- 商品参数校验：空标题、负价格；
-- 提现金额非法：0、负数。
+1. **CSV 参数化**：使用 `@ParameterizedTest` + `@CsvSource` 对相似异常场景进行参数化，例如：
+
+   - 登录失败：用户名/密码错误、用户不存在；
+   - 商品参数校验：空标题、负价格；
+   - 提现金额非法：0、负数。
+
+2. **JSON 文件驱动**：将规律性较强的接口用例数据抽离到 JSON 文件，测试代码只负责读取和断言。例如登录失败场景的数据存放在 `src/test/resources/cases/auth/login_failed_cases.json`，新增失败用例只需修改数据文件，无需改动 Java 代码。
 
 ### 5.6 Allure 报告统一分类
 
