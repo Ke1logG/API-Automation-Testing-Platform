@@ -86,6 +86,9 @@ src/test/java/com/example/api/campusmart/
 ├── context/
 │   ├── AccountContext.java # ThreadLocal 多用户上下文
 │   └── TestAccount.java    # 测试账号模型
+├── datadriven/             # 数据驱动测试模型
+│   └── model/
+│       └── LoginFailedCase.java
 ├── db/                     # 数据库层（灰盒测试支撑）
 │   ├── entity/             # 与后端对应的数据库实体
 │   ├── mapper/             # MyBatis-Plus Mapper
@@ -100,6 +103,7 @@ src/test/java/com/example/api/campusmart/
 ├── testcase/               # 测试用例
 │   ├── BaseTest.java       # 所有测试类基类：账号准备、数据清理
 │   ├── AuthApiTest.java
+│   ├── AuthDataDrivenTest.java    # 登录失败 JSON 数据驱动示例
 │   ├── GoodsApiTest.java
 │   ├── OrderApiTest.java
 │   ├── PaymentApiTest.java
@@ -111,7 +115,10 @@ src/test/java/com/example/api/campusmart/
 src/test/resources/
 ├── application.properties           # 通用配置（含占位符，可提交 Git）
 ├── application-local.properties     # 本地数据库配置（已加入 .gitignore）
-└── junit-platform.properties        # JUnit 5 显示名称生成器
+├── junit-platform.properties        # JUnit 5 显示名称生成器
+└── cases/
+    └── auth/
+        └── login_failed_cases.json  # 登录失败数据驱动用例数据
 ```
 
 ---
