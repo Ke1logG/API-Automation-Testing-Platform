@@ -51,7 +51,7 @@ public class AuthDataDrivenTest {
         Result<String> result = AuthApi.login(loginRequest);
 
         try {
-            // 将用例中的字符串转成枚举类对象
+            // 将用例中的错误码字符串转成枚举类对象
             ResultCode expectedCode = ResultCode.valueOf(testCase.getExpectedCode());
             assertThat(result.getCode()).isEqualTo(expectedCode.getCode());
             assertThat(result.getMessage()).isEqualTo(expectedCode.getMessage());
