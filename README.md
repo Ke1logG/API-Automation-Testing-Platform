@@ -23,7 +23,7 @@
 
 ### 2.1 报告总览
 
-报告首页展示测试执行时间、用例总数、通过率以及按测试套件和 Epic 维度统计的分布情况。共 **38 条**用例，通过率 **100%**。
+报告首页展示测试执行时间、用例总数、通过率以及按测试套件和 Epic 维度统计的分布情况。共 **42 条**用例，通过率 **100%**。
 
 <p align="center">
   <img src="allure-picture/overview.png" width="85%" alt="Allure 报告总览"/>
@@ -194,7 +194,22 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 
 ---
 
-## 六、覆盖的业务链路
+## 六、用例分布统计
+
+| 模块 | 接口数 | 用例数 | 参数化用例数 |
+|---|---:|---:|---:|
+| **Auth** | 2 | 9 | 6 |
+| **Goods** | 6 | 8 | 2 |
+| **Order** | 6 | 13 | 0 |
+| **Payment** | 2 | 6 | 0 |
+| **Wallet** | 3 | 4 | 2 |
+| **合计** | **19** | **40** | **10** |
+
+> 说明：`WalletAndOrderSettlementTest` 为跨模块链路测试，已按涉及接口拆分到 Order 与 Wallet 模块统计；参数化用例数按 JUnit 实际执行次数计算。
+
+---
+
+## 七、覆盖的业务链路
 
 | 模块 | 测试类 | 核心场景 |
 |------|--------|----------|
@@ -204,13 +219,13 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 | 交易链路-支付单 | `PaymentApiTest` | 创建支付单、重复创建、非买家创建限制、非 CREATED 状态限制、取消订单后支付单关闭 |
 | 交易链路-确认收货与钱包 | `WalletAndOrderSettlementTest` | 模拟支付后确认收货、卖家余额增加、收入流水生成、未支付确认收货拦截、非参与者拦截、提现成功、余额不足、金额非法 |
 
-总计 **38 条** 用例，覆盖正向、反向、权限、状态机、参数校验等多类场景。
+总计 **42 条** 用例，覆盖正向、反向、权限、状态机、参数校验等多类场景。
 
 ---
 
-## 七、环境准备
+## 八、环境准备
 
-### 7.1 启动后端服务
+### 8.1 启动后端服务
 
 本项目是接口测试工程，需要后端 CampusMart 服务已启动：  
 
@@ -219,14 +234,14 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 需要配置好后端项目并启动
 
 
-### 7.2 准备本地配置
+### 8.2 准备本地配置
 
 在 `src/test/resources/` 下创建 `application-local.properties`：  
 1. 需要配置本地数据库连接，并通过后端的sql建表语句创建好数据库  
 2. 修改项目连接的端口为后端项目在本地开放的端口（默认8080）
 ---
 
-## 八、如何运行
+## 九、如何运行
 
 1. 启动后端 CampusMart2.0 服务  
 2. 终端输入 mvn clean test 运行测试项目  
