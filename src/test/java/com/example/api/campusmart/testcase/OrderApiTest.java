@@ -21,6 +21,7 @@ import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,13 @@ public class OrderApiTest extends BaseTest {
         sharedOrderId = orderResult.getData().getOrderID();
 
         thirdAccount = registerThirdAccount();
+    }
+
+    @AfterAll
+    void cleanupThirdAccount() {
+        if (thirdAccount != null) {
+            testDataCleanupService.cleanupByUserIds(List.of(thirdAccount.getUserId()));
+        }
     }
 
     @Test
