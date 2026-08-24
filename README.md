@@ -15,6 +15,7 @@
 - **稳定性**：每个测试类使用独立测试账号，状态变更类用例在方法内创建独立数据，避免用例间污染。
 - **可维护性**：API 层与后端接口一一对应，DTO、错误码、工具类分层清晰。
 - **可观测性**：Allure 报告按 Epic / Feature / Story / Severity / Description 统一分类，便于定位问题。
+- **性能验证**：通过 JMeter 多场景压测评估接口性能特征，定位缓存与无缓存路径的吞吐差异。
 
 ---  
 
@@ -66,6 +67,7 @@
 | 数据库 | MyBatis-Plus 3.5.5 + MySQL 8 | 灰盒测试：状态校验、数据准备、脏数据清理 |
 | Spring 容器 | Spring Boot Test 3.2.0 | 测试启动时加载 Spring 上下文，注入 Mapper/Service |
 | 工具 | Lombok、JWT、Jackson、Logback | 减少重复代码，解析 Token，序列化响应 |
+| 性能测试 | JMeter 5.6.3 | 多场景接口压测、报告 |
 
 ---
 
@@ -192,9 +194,44 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 - `@Description`：操作场景 — 具体行为，期望结果。
 
 
+---  
+
+## 六、性能测试（JMeter）
+
+在接口自动化之外，使用 JMeter 5.6.3 对被测系统补充多场景性能压测。
+
+### 压测对象与场景
+
+| 接口 | 类型 | 场景 |
+|------|------|------|
+| 商品详情 /goods/selectById | 读（Redis缓存） | 20/50/100并发 |
+| 商品分页 /goods/page | 读（无缓存） | 20/50/100并发 |
+| 商品搜索 /goods/search | 读（慢查询） | 20/50/100并发 |
+| 创建订单 /orders/create | 写（事务） | 20并发 |
+| 混合场景（73%/15%/10%/2% 权重） | 模拟真实用户 | 100线程 |
+
+### 关键指标（20并发轮）
+
+| 指标 | 商品详情（缓存） | 分页/搜索（无缓存） |
+|------|:---:|:---:|
+| P50 | 9ms | 114~455ms（多场景区间） |
+| 吞吐 | 2258 TPS | 91~107 TPS |
+| 错误率 | 0% | 读接口0%，下单写接口≤0.5% |
+
+<p align="center">
+  <img src="Performance-Test/Picture/JMeter-report-20.png" width="95%" alt="JMeter report-20 Dashboard"/>
+</p>
+
+<p align="center">
+  <img src="Performance-Test/Picture/JMeter-test.png" width="45%" alt="JMeter 测试计划"/>
+</p>
+
+### 运行方式  
+
 ---
 
-## 六、用例分布统计
+
+## 七、用例分布统计
 
 | 模块 | 接口数 | 用例数 | 参数化用例数 |
 |---|---:|---:|---:|
@@ -209,7 +246,7 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 
 ---
 
-## 七、覆盖的业务链路
+## 八、覆盖的业务链路
 
 | 模块 | 测试类 | 核心场景 |
 |------|--------|----------|
@@ -223,9 +260,9 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 
 ---
 
-## 八、环境准备
+## 九、环境准备
 
-### 8.1 启动后端服务
+### 9.1 启动后端服务
 
 本项目是接口测试工程，需要后端 CampusMart 服务已启动：  
 
@@ -234,14 +271,14 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 需要配置好后端项目并启动
 
 
-### 8.2 准备本地配置
+### 9.2 准备本地配置
 
 在 `src/test/resources/` 下创建 `application-local.properties`：  
 1. 需要配置本地数据库连接，并通过后端的sql建表语句创建好数据库  
 2. 修改项目连接的端口为后端项目在本地开放的端口（默认8080）
 ---
 
-## 九、如何运行
+## 十、如何运行
 
 1. 启动后端 CampusMart2.0 服务  
 2. 终端输入 mvn clean test 运行测试项目  
