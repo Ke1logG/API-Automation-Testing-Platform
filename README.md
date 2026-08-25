@@ -228,11 +228,11 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 
 ### 报告查看方式    
 
-1. 打开url：(https://ke1logg.github.io/API-Automation-Testing-Platform/)后按照指引页打开对应轮次测试数据。
+1. 打开 url：[https://ke1logg.github.io/API-Automation-Testing-Platform/](https://ke1logg.github.io/API-Automation-Testing-Platform/) 后按照指引页打开对应轮次测试数据。
 2. 直接打开对应轮次：
-  - 20并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-20/)
-  - 50并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-50/)
-  - 100并发轮（混合场景）：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-mix2/)
+- 20并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-20/)
+- 50并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-50/)
+- 100并发轮（混合场景）：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-mix2/)
 
 ---
 
