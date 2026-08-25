@@ -226,7 +226,13 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
   <img src="Picture/JMeter-test.png" width="45%" alt="JMeter 测试计划"/>
 </p>
 
-### 运行方式  
+### 报告查看方式    
+
+1. 打开url：(https://ke1logg.github.io/API-Automation-Testing-Platform/)后按照指引页打开对应轮次测试数据。
+2. 直接打开对应轮次：
+  - 20并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-20/)
+  - 50并发轮：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-50/)
+  - 100并发轮（混合场景）：(https://ke1logg.github.io/API-Automation-Testing-Platform/report-mix2/)
 
 ---
 
