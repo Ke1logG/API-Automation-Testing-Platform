@@ -219,11 +219,11 @@ public static Result<OrderVo> createOrder(String token, Long goodId) {
 | 错误率 | 0% | 读接口0%，下单写接口≤0.5% |
 
 <p align="center">
-  <img src="Performance-Test/Picture/JMeter-report-20.png" width="95%" alt="JMeter report-20 Dashboard"/>
+  <img src="Picture/JMeter-report-20.png" width="95%" alt="JMeter report-20 Dashboard"/>
 </p>
 
 <p align="center">
-  <img src="Performance-Test/Picture/JMeter-test.png" width="45%" alt="JMeter 测试计划"/>
+  <img src="Picture/JMeter-test.png" width="45%" alt="JMeter 测试计划"/>
 </p>
 
 ### 运行方式  
